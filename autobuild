@@ -1,0 +1,1 @@
+while [ "true" ]; do  coffee -c *.coffee ;  echo done;  sleep 5; done
