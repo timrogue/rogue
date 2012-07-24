@@ -1,0 +1,7 @@
+rm *.js
+
+
+cat src/client/*.coffee > client.coffee
+cat src/server/*.coffee > server.coffee
+coffee -c *.coffee
+
