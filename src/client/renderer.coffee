@@ -2,6 +2,7 @@
 class Renderer
 	canvas: null;
 	context: null;
+	imageCache: {}
 	
 	constructor: () ->
 		# wtf why doesn't this work?
@@ -9,6 +10,7 @@ class Renderer
 		@canvas = document.getElementById("canvas");
 		
 	render: (level) ->
+#		Log.log("Renderer::render")
 		floor = level.floor;
 		this.prepare(level)
 		
@@ -52,14 +54,19 @@ class Renderer
 		;
 		
 	renderUser: (user) ->
-		@context.fillStyle = "#EF1C0A";
-		@context.beginPath();
-		@context.arc(30, 30, 10, 0, Math.PI*2, true); 
-		@context.closePath();
-		@context.fill();
+#		Log.log("Renderer::renderUser")
+		image = @getImageCache(user.imageUrl)
+		@context.drawImage(image, user.position[0], user.position[1], 30, 30);
 		;
 			
+	getImageCache: (url) ->
+		image = @imageCache[url];
+		if (!(image?))
+			image = new Image();
+			image.src = url;
+			@imageCache[url] = image
 			
-			
-			
+		image = @imageCache[url];
+		return image;
+		
 			

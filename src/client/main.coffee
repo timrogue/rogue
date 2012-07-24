@@ -4,6 +4,7 @@ class Main
 	renderer: null;
 	level: null;
 	network: null;
+	ui: null;
 		
 	constructor: () ->
 		Log.log("Main::construct");
@@ -12,26 +13,30 @@ class Main
 		Log.log("Main::start")
 		@renderer = new Renderer();
 		@network = new Network();
+		@ui = new UI();
 		
 	initializeTimers: () ->
 		# hmmmmmmm
 		scope = this
 		window.setInterval(
-			() -> scope.draw(), 
+			() -> scope.update(0.1), 
 			100
 		);
 	
 	initialize: (seed, user) ->
+		Log.log("Main::initialize")
 		levelGenerator = new LevelGenerator(seed);
 		@level = levelGenerator.generate();
-		@user = user;
+		@user = new User(user);
+		@level.users[user.uid] = @user
 		this.initializeTimers()
-		Log.log("initializeend")
 		
-	draw: () ->
+	update: (dt) ->
+		@user.update(dt);
+		@network.update(dt)
 		@renderer.render(@level)
 	
-	getCurrentLevel: () ->
+	getLevel: () ->
 		return @level;
 		
 	getRenderer: () ->

@@ -1,5 +1,7 @@
 class Network
 	socket: null
+	messageInterval: 0.25
+	elapsedTime: 0
 
 	onInitialization: (data) ->
 		Log.log("Network::onInitialization");
@@ -7,15 +9,15 @@ class Network
 	
 	onAddUser: (data) ->
 		Log.log("Network::onAddUser");
-		MainSingleton.get().addUser()
+		MainSingleton.get().getLevel().addUser(new User(data))
 		
 	onMessage: (data) ->
 		Log.log("Network::onMessage");
-		MainSingleton.get().onMessage(data);
+		MainSingleton.get().getLevel().onMessage(data);
 	
 	onRemoveUser: (data) ->
 		Log.log("Network::onRemoveUser");
-		MainSingleton.get().onRemoveUser()
+		MainSingleton.get().getLevel().onRemoveUser(data.uid)
 	
 	constructor: () ->
 		Log.log("Network::constructor");
@@ -28,13 +30,13 @@ class Network
 		@socket.on('x', (data)-> scope.onMessage(data));
 		@socket.on('-', (data)-> scope.onRemoveUser(data));
 		
-		sendMessage = () ->
-			@socket.emit('x', {z:1})
-		
-		$('#go').click(()->
-			sendMessage()
-		)
-
-		
-		
+	update: (dt) ->
+		@elapsedTime += dt;
+		if (@elapsedTime > @messageInterval)
+			@elapsedTime = 0;
+			user = MainSingleton.get().getUser();
+			if (user.isModified())
+				user.resetModified();
+				@socket.emit('x',{'t':'p', 'd':user.position});
+		;
 		

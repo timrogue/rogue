@@ -24,20 +24,28 @@ class Floor
 		return id
 	
 class Level
-	users: {}
+	users: null
 	floor: null
+	
+	constructor: () ->
+		@users = {}
+		@floor = null
 	
 	setFloor: (floor) ->
 		@floor = floor;
 		
 	addUser: (user) ->
-		users[user.uid] = uid;
+		@users[user.uid] = user;
 		
 	getUser: (uid) ->
-		return users[uid]
+		user = @users[uid]
+		return user;
 		
-	removeUser: (uid) ->
-		delete users[uid];
+	onMessage: (data) ->
+		@getUser(data.uid).applyMessage(data)
+		
+	removeUser: (user) ->
+		delete users[user.uid];
 		
 
 		
