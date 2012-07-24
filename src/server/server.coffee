@@ -29,18 +29,22 @@ seed = Math.random() * 10;
 ########################
 class User	
 	uid: "-1" 
-	name: "Anonymous"
-	image: ""
-	position: [0,0];
+	name: null;
+	imageUrl: null
+	position: null
+	
+	constructor: () ->
+		@imageUrl = "http://www.html5canvastutorials.com/demos/assets/darth-vader.jpg"
+		@name = "Anonymous"
+		@position = [0,0]
 		
-
 class Client
 	user: null;
 	socket: null;
 	
 	constructor: (user, socket) ->
-		this.user = user;
-		this.socket = socket;
+		@user = user;
+		@socket = socket;
 #############################
 
 # on connection
@@ -48,7 +52,6 @@ io.sockets.on('connection', (socket)->
 	console.log((new Date()) + ' Connection from origin.');
 	
 	user = new User()
-	
 	user.uid = 
 		"" + (Math.floor(Math.random() * 65368) + 
 		Math.floor(Math.random() * 65368) + 
@@ -59,12 +62,12 @@ io.sockets.on('connection', (socket)->
 	# reflect to clients a new user, and the existing to the new user
 	for uid, client of clients
 		console.log((new Date()) + ' Sending message to '+ uid);
-		client.emit('+', { 'uid': user.id });
-		socket.emit('+', { 'uid': uid })
+		client.socket.emit('+', user);
+		socket.emit('+', client.user)
 		
 	# register the client
 	
-	clients[user.id] = User(user, socket);
+	clients[user.uid] = new Client(user, socket);
 	
 	# log it
 	console.log((new Date()) + ' Connection accepted.');
@@ -72,7 +75,7 @@ io.sockets.on('connection', (socket)->
 	# user sent some message
 	socket.on('x', (data) ->
 		# mark the uid of the message
-		data.uid = user.id;
+		data.uid = user.uid;
 	
 		# todo:
 		#   code for entry
@@ -80,7 +83,7 @@ io.sockets.on('connection', (socket)->
 		#   code for exit
 	
 		# log and broadcast the message
-		console.log((new Date()) + ' Received Message from ' + user.id + ': ' + JSON.stringify(data));
+		console.log((new Date()) + ' Received Message from ' + user.uid + ': ' + JSON.stringify(data));
 
 		# reflect it
 		for uid, client of clients
@@ -94,12 +97,12 @@ io.sockets.on('connection', (socket)->
 	socket.on('disconnect', () ->
 		console.log((new Date()) + " Peer " + socket + " disconnected.");
 		# remove user from the list of connected clients
-		delete clients[user.id];
+		delete clients[user.uid];
 
 		# reflect the death
 		for uid, client of clients
 			console.log((new Date()) + ' Sending message to '+ uid);
-			client.socket.emit('-', { 'uid': user.id });
+			client.socket.emit('-', { 'uid': user.uid });
 
 	);
 );
